@@ -5,10 +5,10 @@ import (
 	"log"
 	"net"
 
-	"github.com/koldyba/gu-certmgr/pkg/api"
-	"github.com/koldyba/gu-certmgr/pkg/certificates"
-	"github.com/koldyba/gu-certmgr/pkg/config"
-	"github.com/koldyba/gu-certmgr/pkg/db"
+	"github.com/IlyaKhalizov/golang-united-certificates/pkg/api"
+	"github.com/IlyaKhalizov/golang-united-certificates/pkg/certificates"
+	"github.com/IlyaKhalizov/golang-united-certificates/pkg/config"
+	"github.com/IlyaKhalizov/golang-united-certificates/pkg/db"
 
 	"google.golang.org/grpc"
 )

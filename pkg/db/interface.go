@@ -3,7 +3,7 @@
 
 package db
 
-import "github.com/koldyba/gu-certmgr/pkg/models"
+import "github.com/IlyaKhalizov/golang-united-certificates/pkg/models"
 
 type DB interface {
 	Connect(connectionString string)

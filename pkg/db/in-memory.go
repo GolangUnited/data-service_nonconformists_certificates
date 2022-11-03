@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/koldyba/gu-certmgr/pkg/models"
+	"github.com/IlyaKhalizov/golang-united-certificates/pkg/models"
 
 	"github.com/google/uuid"
 )

@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 
-	"github.com/koldyba/gu-certmgr/pkg/api"
-	"github.com/koldyba/gu-certmgr/pkg/db"
-	"github.com/koldyba/gu-certmgr/pkg/helpers"
+	"github.com/IlyaKhalizov/golang-united-certificates/pkg/api"
+	"github.com/IlyaKhalizov/golang-united-certificates/pkg/db"
+	"github.com/IlyaKhalizov/golang-united-certificates/pkg/helpers"
 
 	"google.golang.org/protobuf/types/known/emptypb"
 )

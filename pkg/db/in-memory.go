@@ -73,7 +73,7 @@ func (rcv *InMemDb) ListForUser(pageSize int, pageToken string, userId string) (
 func (rcv *InMemDb) ListForCourse(pageSize int, pageToken string, courseId string) (result []models.Certificate, NextPageToken string, err error) {
 	intermediateDb := InMemDb{}
 	for _, cert := range rcv.records {
-		if cert.UserId == courseId {
+		if cert.CourseId == courseId {
 			intermediateDb.records = append(intermediateDb.records, cert)
 		}
 	}

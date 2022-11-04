@@ -3,13 +3,13 @@
 
 package db
 
-import "github.com/IlyaKhalizov/golang-united-certificates/pkg/models"
+import "golang-united-certificates/pkg/models"
 
 type DB interface {
 	Connect(connectionString string)
 	GetCertById(certId string) (result models.Certificate, err error)
 	IsCertExistsByUserAndCourse(userId, courseId string) bool
-	Issue(userId, courseId string) (result models.Certificate, err error)
+	Create(userId, courseId string) (result models.Certificate, err error)
 	List(pageSize int, pageToken string) (result []models.Certificate, NextPageToken string, err error)
 	ListForUser(pageSize int, pageToken string, userId string) (result []models.Certificate, NextPageToken string, err error)
 	ListForCourse(pageSize int, pageToken string, courseId string) (result []models.Certificate, NextPageToken string, err error)

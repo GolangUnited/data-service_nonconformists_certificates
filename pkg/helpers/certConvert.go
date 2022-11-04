@@ -3,8 +3,8 @@ package helpers
 import (
 	"time"
 
-	"github.com/IlyaKhalizov/golang-united-certificates/pkg/api"
-	"github.com/IlyaKhalizov/golang-united-certificates/pkg/models"
+	"golang-united-certificates/pkg/api"
+	"golang-united-certificates/pkg/models"
 
 	"google.golang.org/protobuf/types/known/timestamppb"
 )

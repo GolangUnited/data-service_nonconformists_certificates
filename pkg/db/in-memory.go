@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/IlyaKhalizov/golang-united-certificates/pkg/models"
+	"golang-united-certificates/pkg/models"
 
 	"github.com/google/uuid"
 )
@@ -34,7 +34,7 @@ func (rcv *InMemDb) IsCertExistsByUserAndCourse(userId, courseId string) bool {
 	return false
 }
 
-func (rcv *InMemDb) Issue(userId, courseId string) (result models.Certificate, err error) {
+func (rcv *InMemDb) Create(userId, courseId string) (result models.Certificate, err error) {
 	result = models.Certificate{CertId: uuid.New().String(), UserId: userId, CourseId: courseId, CreatedAt: time.Now()}
 	rcv.records = append(rcv.records, result)
 	return

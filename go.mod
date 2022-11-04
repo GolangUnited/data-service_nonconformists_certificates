@@ -1,4 +1,4 @@
-module github.com/IlyaKhalizov/golang-united-certificates
+module golang-united-certificates
 
 go 1.19
 

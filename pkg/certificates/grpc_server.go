@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 
-	"github.com/IlyaKhalizov/golang-united-certificates/pkg/api"
-	"github.com/IlyaKhalizov/golang-united-certificates/pkg/db"
-	"github.com/IlyaKhalizov/golang-united-certificates/pkg/helpers"
+	"golang-united-certificates/pkg/api"
+	"golang-united-certificates/pkg/db"
+	"golang-united-certificates/pkg/helpers"
 
 	"google.golang.org/protobuf/types/known/emptypb"
 )
@@ -21,15 +21,15 @@ func (srv *GRPCServer) Get(ctx context.Context, req *api.GetRequest) (*api.GetRe
 	return &api.GetResponse{Certificate: helpers.WriteApiCert(cert)}, err
 }
 
-func (srv *GRPCServer) Issue(ctx context.Context, req *api.IssueRequest) (*api.IssueResponse, error) {
+func (srv *GRPCServer) Create(ctx context.Context, req *api.CreateRequest) (*api.CreateResponse, error) {
 	if srv.Database.IsCertExistsByUserAndCourse(req.UserId, req.CourseId) {
-		return &api.IssueResponse{}, errors.New("Cert for this user for this course was already issued")
+		return &api.CreateResponse{}, errors.New("Cert for this user for this course was already Created")
 	}
-	cert, err := srv.Database.Issue(req.UserId, req.CourseId)
+	cert, err := srv.Database.Create(req.UserId, req.CourseId)
 	if err != nil {
 		return nil, err
 	}
-	return &api.IssueResponse{Certificate: helpers.WriteApiCert(cert)}, nil
+	return &api.CreateResponse{Certificate: helpers.WriteApiCert(cert)}, nil
 }
 
 func (srv *GRPCServer) List(ctx context.Context, req *api.ListRequest) (*api.ListResponse, error) {

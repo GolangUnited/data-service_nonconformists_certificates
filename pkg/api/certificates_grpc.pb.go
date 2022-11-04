@@ -24,7 +24,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type CertificatesClient interface {
 	Get(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*GetResponse, error)
-	Issue(ctx context.Context, in *IssueRequest, opts ...grpc.CallOption) (*IssueResponse, error)
+	Create(ctx context.Context, in *CreateRequest, opts ...grpc.CallOption) (*CreateResponse, error)
 	List(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*ListResponse, error)
 	ListForUser(ctx context.Context, in *ListForUserRequest, opts ...grpc.CallOption) (*ListResponse, error)
 	ListForCourse(ctx context.Context, in *ListForCourseRequest, opts ...grpc.CallOption) (*ListResponse, error)
@@ -48,9 +48,9 @@ func (c *certificatesClient) Get(ctx context.Context, in *GetRequest, opts ...gr
 	return out, nil
 }
 
-func (c *certificatesClient) Issue(ctx context.Context, in *IssueRequest, opts ...grpc.CallOption) (*IssueResponse, error) {
-	out := new(IssueResponse)
-	err := c.cc.Invoke(ctx, "/certificates.Certificates/Issue", in, out, opts...)
+func (c *certificatesClient) Create(ctx context.Context, in *CreateRequest, opts ...grpc.CallOption) (*CreateResponse, error) {
+	out := new(CreateResponse)
+	err := c.cc.Invoke(ctx, "/certificates.Certificates/Create", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -98,7 +98,7 @@ func (c *certificatesClient) Delete(ctx context.Context, in *DeleteRequest, opts
 // for forward compatibility
 type CertificatesServer interface {
 	Get(context.Context, *GetRequest) (*GetResponse, error)
-	Issue(context.Context, *IssueRequest) (*IssueResponse, error)
+	Create(context.Context, *CreateRequest) (*CreateResponse, error)
 	List(context.Context, *ListRequest) (*ListResponse, error)
 	ListForUser(context.Context, *ListForUserRequest) (*ListResponse, error)
 	ListForCourse(context.Context, *ListForCourseRequest) (*ListResponse, error)
@@ -113,8 +113,8 @@ type UnimplementedCertificatesServer struct {
 func (UnimplementedCertificatesServer) Get(context.Context, *GetRequest) (*GetResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
 }
-func (UnimplementedCertificatesServer) Issue(context.Context, *IssueRequest) (*IssueResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Issue not implemented")
+func (UnimplementedCertificatesServer) Create(context.Context, *CreateRequest) (*CreateResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Create not implemented")
 }
 func (UnimplementedCertificatesServer) List(context.Context, *ListRequest) (*ListResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method List not implemented")
@@ -159,20 +159,20 @@ func _Certificates_Get_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Certificates_Issue_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(IssueRequest)
+func _Certificates_Create_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CertificatesServer).Issue(ctx, in)
+		return srv.(CertificatesServer).Create(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/certificates.Certificates/Issue",
+		FullMethod: "/certificates.Certificates/Create",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CertificatesServer).Issue(ctx, req.(*IssueRequest))
+		return srv.(CertificatesServer).Create(ctx, req.(*CreateRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -261,8 +261,8 @@ var Certificates_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Certificates_Get_Handler,
 		},
 		{
-			MethodName: "Issue",
-			Handler:    _Certificates_Issue_Handler,
+			MethodName: "Create",
+			Handler:    _Certificates_Create_Handler,
 		},
 		{
 			MethodName: "List",

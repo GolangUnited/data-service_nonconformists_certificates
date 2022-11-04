@@ -8,7 +8,7 @@ package certificates;
 
 service Certificates {
     rpc Get (GetRequest) returns (GetResponse);
-    rpc Issue (IssueRequest) returns (IssueResponse);
+    rpc Create (CreateRequest) returns (CreateResponse);
     rpc List (ListRequest) returns (ListResponse);
     rpc ListForUser (ListForUserRequest) returns (ListResponse);
     rpc ListForCourse (ListForCourseRequest) returns (ListResponse);
@@ -19,7 +19,7 @@ message Cert {
     string cert_id = 1;
     string user_id = 2;
     string course_id = 3;
-    google.protobuf.Timestamp CreatedAt = 4;
+    google.protobuf.Timestamp created_at = 4;
 }
 
 message GetRequest {
@@ -30,12 +30,12 @@ message GetResponse {
     Cert certificate = 1;
 }
 
-message IssueRequest {
+message CreateRequest {
     string user_id = 1;
     string course_id = 2;
 }
 
-message IssueResponse {
+message CreateResponse {
     Cert certificate = 1;
 }
 

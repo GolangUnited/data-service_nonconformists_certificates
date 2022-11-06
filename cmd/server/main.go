@@ -26,7 +26,7 @@ func main() {
 		database = new(db.InMemDb)
 	}
 	database.Connect(conf.ConnectionString)
-
+	defer database.Disconnect()
 	srv := grpc.NewServer()
 	grpcsrv := &certificates.GRPCServer{Database: database}
 	api.RegisterCertificatesServer(srv, grpcsrv)

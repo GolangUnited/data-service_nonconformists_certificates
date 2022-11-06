@@ -16,14 +16,14 @@ service Certificates {
 }
 
 message Cert {
-    string cert_id = 1;
+    string id = 1;
     string user_id = 2;
     string course_id = 3;
     google.protobuf.Timestamp created_at = 4;
 }
 
 message GetRequest {
-    string cert_id = 1;
+    string id = 1;
 }
 
 message GetResponse {
@@ -65,5 +65,5 @@ message ListForCourseRequest {
 }
 
 message DeleteRequest {
-    string cert_id = 1;
+    string id = 1;
 }

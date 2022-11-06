@@ -17,7 +17,7 @@ type GRPCServer struct {
 }
 
 func (srv *GRPCServer) Get(ctx context.Context, req *api.GetRequest) (*api.GetResponse, error) {
-	cert, err := srv.Database.GetCertById(req.CertId)
+	cert, err := srv.Database.GetCertById(req.Id)
 	return &api.GetResponse{Certificate: helpers.WriteApiCert(cert)}, err
 }
 
@@ -58,6 +58,6 @@ func (srv *GRPCServer) ListForCourse(ctx context.Context, req *api.ListForCourse
 	return &api.ListResponse{Certificates: resp, NextPageToken: npt}, err
 }
 func (srv *GRPCServer) Delete(ctx context.Context, req *api.DeleteRequest) (*emptypb.Empty, error) {
-	srv.Database.Delete(req.CertId)
+	srv.Database.Delete(req.Id)
 	return &emptypb.Empty{}, nil
 }

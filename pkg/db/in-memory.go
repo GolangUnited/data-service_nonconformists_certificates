@@ -16,9 +16,9 @@ type InMemDb struct {
 	records []models.Certificate
 }
 
-func (rcv *InMemDb) GetCertById(certId string) (result models.Certificate, err error) {
+func (rcv *InMemDb) GetCertById(id string) (result models.Certificate, err error) {
 	for _, cert := range rcv.records {
-		if cert.CertId == certId {
+		if cert.Id == id {
 			return cert, err
 		}
 	}
@@ -35,7 +35,7 @@ func (rcv *InMemDb) IsCertExistsByUserAndCourse(userId, courseId string) bool {
 }
 
 func (rcv *InMemDb) Create(userId, courseId string) (result models.Certificate, err error) {
-	result = models.Certificate{CertId: uuid.New().String(), UserId: userId, CourseId: courseId, CreatedAt: time.Now()}
+	result = models.Certificate{Id: uuid.New().String(), UserId: userId, CourseId: courseId, CreatedAt: time.Now()}
 	rcv.records = append(rcv.records, result)
 	return
 }
@@ -83,9 +83,9 @@ func (rcv *InMemDb) ListForCourse(pageSize int, pageToken string, courseId strin
 	return intermediateDb.List(pageSize, pageToken)
 }
 
-func (rcv *InMemDb) Delete(certId string) {
+func (rcv *InMemDb) Delete(id string) {
 	for k, cert := range rcv.records {
-		if cert.CertId == certId {
+		if cert.Id == id {
 			rcv.records[k], rcv.records[len(rcv.records)-1] = rcv.records[len(rcv.records)-1], rcv.records[k]
 		}
 	}
@@ -98,10 +98,16 @@ func (rcv *InMemDb) Connect(connectionString string) {
 	log.Println("done!")
 }
 
+func (rcv *InMemDb) Disconnect() {
+	log.Println("flushing In-Memory Database...")
+	rcv.records = nil
+	log.Println("done!")
+}
+
 // func newIMD generates data for in-memory storage
 func (rcv *InMemDb) init() {
 	for i := 0; i < 100; i++ {
 		time.Sleep(time.Duration(2))
-		rcv.records = append(rcv.records, models.Certificate{CertId: fmt.Sprint(uuid.New()), UserId: fmt.Sprint(uuid.New()), CourseId: fmt.Sprint(uuid.New()), CreatedAt: time.Now()})
+		rcv.records = append(rcv.records, models.Certificate{Id: fmt.Sprint(uuid.New()), UserId: fmt.Sprint(uuid.New()), CourseId: fmt.Sprint(uuid.New()), CreatedAt: time.Now()})
 	}
 }

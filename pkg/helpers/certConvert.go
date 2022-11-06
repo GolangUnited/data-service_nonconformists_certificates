@@ -10,8 +10,8 @@ import (
 )
 
 func WriteApiCert(cert models.Certificate) *api.Cert {
-	return &api.Cert{CertId: cert.CertId, UserId: cert.UserId, CourseId: cert.CourseId, CreatedAt: timestamppb.New(cert.CreatedAt)}
+	return &api.Cert{Id: cert.Id, UserId: cert.UserId, CourseId: cert.CourseId, CreatedAt: timestamppb.New(cert.CreatedAt)}
 }
 func GetApiCert(apiCert *api.Cert) models.Certificate {
-	return models.Certificate{CertId: apiCert.CertId, UserId: apiCert.UserId, CourseId: apiCert.CourseId, CreatedAt: time.Unix(apiCert.CreatedAt.Seconds, int64(apiCert.CreatedAt.Nanos))}
+	return models.Certificate{Id: apiCert.Id, UserId: apiCert.UserId, CourseId: apiCert.CourseId, CreatedAt: time.Unix(apiCert.CreatedAt.Seconds, int64(apiCert.CreatedAt.Nanos))}
 }

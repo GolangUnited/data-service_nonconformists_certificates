@@ -16,13 +16,13 @@ type InMemDb struct {
 	records []models.Certificate
 }
 
-func (rcv *InMemDb) GetCertById(id string) (result models.Certificate, err error) {
+func (rcv *InMemDb) GetCertById(id string) (models.Certificate, error) {
 	for _, cert := range rcv.records {
 		if cert.Id == id {
-			return cert, err
+			return cert, nil
 		}
 	}
-	return result, errors.New("No cert was found")
+	return models.Certificate{}, errors.New("No cert was found")
 }
 
 func (rcv *InMemDb) IsCertExistsByUserAndCourse(userId, courseId string) bool {
@@ -34,30 +34,35 @@ func (rcv *InMemDb) IsCertExistsByUserAndCourse(userId, courseId string) bool {
 	return false
 }
 
-func (rcv *InMemDb) Create(userId, courseId string) (result models.Certificate, err error) {
-	result = models.Certificate{Id: uuid.New().String(), UserId: userId, CourseId: courseId, CreatedAt: time.Now()}
-	rcv.records = append(rcv.records, result)
-	return
+func (rcv *InMemDb) Create(userId, courseId string) (models.Certificate, error) {
+	cert := models.Certificate{Id: uuid.New().String(), UserId: userId, CourseId: courseId, CreatedAt: time.Now()}
+	rcv.records = append(rcv.records, cert)
+	return cert, nil
 }
 
-func (rcv *InMemDb) List(pageSize int, pageToken string) (result []models.Certificate, NextPageToken string, err error) {
+func (rcv *InMemDb) List(pageSize int, pageToken string) ([]models.Certificate, string, error) {
+	var npt string
 	if pageSize == 0 {
-		return rcv.records, NextPageToken, nil
+		return rcv.records, npt, nil
 	}
 	pt, err := strconv.Atoi(pageToken)
-	if pt >= len(rcv.records) {
-		return nil, NextPageToken, errors.New("Incorrect page token")
+	if err != nil {
+		return nil, npt, err
 	}
+	if pt >= len(rcv.records) {
+		return nil, npt, errors.New("Incorrect page token")
+	}
+	var result []models.Certificate
 	if pt+pageSize >= len(rcv.records) {
 		result = append(result, rcv.records[pt:len(rcv.records)]...)
 	} else {
 		result = append(result, rcv.records[pt:pt+pageSize]...)
-		NextPageToken = strconv.Itoa(pt + pageSize)
+		npt = strconv.Itoa(pt + pageSize)
 	}
-	return result, NextPageToken, nil
+	return result, npt, nil
 }
 
-func (rcv *InMemDb) ListForUser(pageSize int, pageToken string, userId string) (result []models.Certificate, NextPageToken string, err error) {
+func (rcv *InMemDb) ListForUser(pageSize int, pageToken string, userId string) ([]models.Certificate, string, error) {
 	intermediateDb := InMemDb{}
 	for _, cert := range rcv.records {
 		if cert.UserId == userId {
@@ -65,12 +70,12 @@ func (rcv *InMemDb) ListForUser(pageSize int, pageToken string, userId string) (
 		}
 	}
 	if len(intermediateDb.records) == 0 {
-		return result, NextPageToken, errors.New("No certificates were found for user")
+		return nil, "", errors.New("No certificates were found for user")
 	}
 	return intermediateDb.List(pageSize, pageToken)
 }
 
-func (rcv *InMemDb) ListForCourse(pageSize int, pageToken string, courseId string) (result []models.Certificate, NextPageToken string, err error) {
+func (rcv *InMemDb) ListForCourse(pageSize int, pageToken string, courseId string) ([]models.Certificate, string, error) {
 	intermediateDb := InMemDb{}
 	for _, cert := range rcv.records {
 		if cert.CourseId == courseId {
@@ -78,7 +83,7 @@ func (rcv *InMemDb) ListForCourse(pageSize int, pageToken string, courseId strin
 		}
 	}
 	if len(intermediateDb.records) == 0 {
-		return []models.Certificate{}, NextPageToken, errors.New("No certificates were found for course")
+		return nil, "", errors.New("No certificates were found for course")
 	}
 	return intermediateDb.List(pageSize, pageToken)
 }

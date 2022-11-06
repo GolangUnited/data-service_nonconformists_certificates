@@ -12,12 +12,13 @@ type Config struct {
 	ConnectionString string
 }
 
-func GetConfig() (conf Config, err error) {
+func GetConfig() (Config, error) {
 	log.Println("reading config...")
 	viper.SetConfigFile(".env")
 	viper.SetEnvPrefix("certmgr")
 	viper.AutomaticEnv()
-	viper.ReadInConfig()
+	err := viper.ReadInConfig()
+	var conf Config
 	if err != nil {
 		return conf, err
 	}

@@ -39,9 +39,9 @@ func (srv *GRPCServer) Create(ctx context.Context, req *api.CreateRequest) (*api
 
 func (srv *GRPCServer) List(ctx context.Context, req *api.ListRequest) (*api.ListResponse, error) {
 	data, npt, err := srv.Database.List(int(req.PageSize), req.PageToken)
-	resp := []*api.Cert{}
-	for _, cert := range data {
-		resp = append(resp, helpers.WriteApiCert(cert))
+	resp := make([]*api.Cert, len(data))
+	for k, cert := range data {
+		resp[k] = helpers.WriteApiCert(cert)
 	}
 	if err != nil {
 		err = status.New(codes.Internal, err.Error()).Err()
@@ -51,9 +51,9 @@ func (srv *GRPCServer) List(ctx context.Context, req *api.ListRequest) (*api.Lis
 
 func (srv *GRPCServer) ListForUser(ctx context.Context, req *api.ListForUserRequest) (*api.ListResponse, error) {
 	data, npt, err := srv.Database.ListForUser(int(req.PageSize), req.PageToken, req.UserId)
-	resp := []*api.Cert{}
-	for _, cert := range data {
-		resp = append(resp, helpers.WriteApiCert(cert))
+	resp := make([]*api.Cert, len(data))
+	for k, cert := range data {
+		resp[k] = helpers.WriteApiCert(cert)
 	}
 	if err != nil {
 		err = status.New(codes.Internal, err.Error()).Err()
@@ -62,9 +62,9 @@ func (srv *GRPCServer) ListForUser(ctx context.Context, req *api.ListForUserRequ
 }
 func (srv *GRPCServer) ListForCourse(ctx context.Context, req *api.ListForCourseRequest) (*api.ListResponse, error) {
 	data, npt, err := srv.Database.ListForCourse(int(req.PageSize), req.PageToken, req.CourseId)
-	resp := []*api.Cert{}
-	for _, cert := range data {
-		resp = append(resp, helpers.WriteApiCert(cert))
+	resp := make([]*api.Cert, len(data))
+	for k, cert := range data {
+		resp[k] = helpers.WriteApiCert(cert)
 	}
 	if err != nil {
 		err = status.New(codes.Internal, err.Error()).Err()

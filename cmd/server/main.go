@@ -22,7 +22,10 @@ func main() {
 	switch conf.DBType {
 	case "inmem":
 		database = new(db.InMemDb)
+	case "psql":
+		database = new(db.PgSql)
 	default:
+		log.Println("starting with default DB...")
 		database = new(db.InMemDb)
 	}
 	database.Connect(conf.ConnectionString)

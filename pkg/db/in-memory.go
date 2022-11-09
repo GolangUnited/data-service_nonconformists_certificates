@@ -97,10 +97,11 @@ func (rcv *InMemDb) Delete(id string) {
 	rcv.records = rcv.records[0 : len(rcv.records)-2]
 }
 
-func (rcv *InMemDb) Connect(connectionString string) {
+func (rcv *InMemDb) Connect(connectionString string) error {
 	log.Println("initilazing local In-Memory Database...")
 	rcv.init()
 	log.Println("done!")
+	return nil
 }
 
 func (rcv *InMemDb) Disconnect() {

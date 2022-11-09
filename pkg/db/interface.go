@@ -6,7 +6,7 @@ package db
 import "golang-united-certificates/pkg/models"
 
 type DB interface {
-	Connect(connectionString string)
+	Connect(connectionString string) error
 	GetCertById(id string) (result models.Certificate, err error)
 	IsCertExistsByUserAndCourse(userId, courseId string) bool
 	Create(userId, courseId string) (result models.Certificate, err error)

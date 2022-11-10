@@ -7,12 +7,9 @@ import "golang-united-certificates/internal/models"
 
 type CertificatesRepos interface {
 	Connect(connectionString string) error
-	GetCertById(id string) (result models.Certificate, err error)
-	IsCertExistsByUserAndCourse(userId, courseId string) bool
-	Create(userId, courseId string) (result models.Certificate, err error)
-	List(pageSize int, pageToken string) (result []models.Certificate, NextPageToken string, err error)
-	ListForUser(pageSize int, pageToken string, userId string) (result []models.Certificate, NextPageToken string, err error)
-	ListForCourse(pageSize int, pageToken string, courseId string) (result []models.Certificate, NextPageToken string, err error)
-	Delete(id string)
+	GetById(id string) (result models.Certificate, err error)
+	Create(cert *models.Certificate) error
+	List(listOptions models.ListOptions) (result []models.Certificate, NextPageToken string, err error)
+	Delete(id string) error
 	Disconnect()
 }

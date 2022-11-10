@@ -16,7 +16,7 @@ type InMemDb struct {
 	records []models.Certificate
 }
 
-func (rcv *InMemDb) GetCertById(id string) (models.Certificate, error) {
+func (rcv *InMemDb) GetById(id string) (models.Certificate, error) {
 	for _, cert := range rcv.records {
 		if cert.Id == id {
 			return cert, nil
@@ -25,7 +25,7 @@ func (rcv *InMemDb) GetCertById(id string) (models.Certificate, error) {
 	return models.Certificate{}, errors.New("No cert was found")
 }
 
-func (rcv *InMemDb) IsCertExistsByUserAndCourse(userId, courseId string) bool {
+func (rcv *InMemDb) IsExistsForUserAndCourse(userId, courseId string) bool {
 	for _, cert := range rcv.records {
 		if cert.UserId == userId && cert.CourseId == courseId {
 			return true
@@ -34,67 +34,59 @@ func (rcv *InMemDb) IsCertExistsByUserAndCourse(userId, courseId string) bool {
 	return false
 }
 
-func (rcv *InMemDb) Create(userId, courseId string) (models.Certificate, error) {
-	cert := models.Certificate{Id: uuid.New().String(), UserId: userId, CourseId: courseId, CreatedAt: time.Now()}
-	rcv.records = append(rcv.records, cert)
-	return cert, nil
+func (rcv *InMemDb) Create(cert *models.Certificate) error {
+	cert.CreatedAt = time.Now()
+	rcv.records = append(rcv.records, *cert)
+	return nil
 }
 
-func (rcv *InMemDb) List(pageSize int, pageToken string) ([]models.Certificate, string, error) {
+func (rcv *InMemDb) List(listOptions models.ListOptions) ([]models.Certificate, string, error) {
 	var npt string
-	if pageSize == 0 {
-		return rcv.records, npt, nil
-	}
-	pt, err := strconv.Atoi(pageToken)
+
+	pt, err := strconv.Atoi(listOptions.PageToken)
 	if err != nil {
 		return nil, npt, err
 	}
-	if pt >= len(rcv.records) {
+	var fresult []models.Certificate
+	for _, cert := range rcv.records {
+		if filterByUserID(cert, listOptions.UserId) {
+			if filterByCourseID(cert, listOptions.CourseId) {
+				fresult = append(fresult, cert)
+			}
+		}
+	}
+	if len(fresult) == 0 {
+		return nil, npt, errors.New("no records found")
+	}
+	if pt >= len(fresult) {
 		return nil, npt, errors.New("Incorrect page token")
 	}
+
 	var result []models.Certificate
-	if pt+pageSize >= len(rcv.records) {
-		result = append(result, rcv.records[pt:len(rcv.records)]...)
+	if pt+listOptions.PageSize >= len(fresult) {
+		result = append(result, fresult[pt:len(fresult)]...)
 	} else {
-		result = append(result, rcv.records[pt:pt+pageSize]...)
-		npt = strconv.Itoa(pt + pageSize)
+		result = append(result, fresult[pt:pt+listOptions.PageSize]...)
+		npt = strconv.Itoa(pt + listOptions.PageSize)
 	}
 	return result, npt, nil
 }
 
-func (rcv *InMemDb) ListForUser(pageSize int, pageToken string, userId string) ([]models.Certificate, string, error) {
-	intermediateDb := InMemDb{}
-	for _, cert := range rcv.records {
-		if cert.UserId == userId {
-			intermediateDb.records = append(intermediateDb.records, cert)
-		}
-	}
-	if len(intermediateDb.records) == 0 {
-		return nil, "", errors.New("No certificates were found for user")
-	}
-	return intermediateDb.List(pageSize, pageToken)
+func filterByUserID(cert models.Certificate, uid string) bool {
+	return cert.UserId == uid || uid == ""
+}
+func filterByCourseID(cert models.Certificate, cid string) bool {
+	return cert.CourseId == cid || cid == ""
 }
 
-func (rcv *InMemDb) ListForCourse(pageSize int, pageToken string, courseId string) ([]models.Certificate, string, error) {
-	intermediateDb := InMemDb{}
-	for _, cert := range rcv.records {
-		if cert.CourseId == courseId {
-			intermediateDb.records = append(intermediateDb.records, cert)
-		}
-	}
-	if len(intermediateDb.records) == 0 {
-		return nil, "", errors.New("No certificates were found for course")
-	}
-	return intermediateDb.List(pageSize, pageToken)
-}
-
-func (rcv *InMemDb) Delete(id string) {
+func (rcv *InMemDb) Delete(id string) error {
 	for k, cert := range rcv.records {
 		if cert.Id == id {
 			rcv.records[k], rcv.records[len(rcv.records)-1] = rcv.records[len(rcv.records)-1], rcv.records[k]
 		}
 	}
 	rcv.records = rcv.records[0 : len(rcv.records)-2]
+	return nil
 }
 
 func (rcv *InMemDb) Connect(connectionString string) error {

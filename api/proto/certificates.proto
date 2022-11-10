@@ -10,8 +10,6 @@ service Certificates {
     rpc Get (GetRequest) returns (GetResponse);
     rpc Create (CreateRequest) returns (CreateResponse);
     rpc List (ListRequest) returns (ListResponse);
-    rpc ListForUser (ListForUserRequest) returns (ListResponse);
-    rpc ListForCourse (ListForCourseRequest) returns (ListResponse);
     rpc Delete (DeleteRequest) returns (google.protobuf.Empty);
 }
 
@@ -40,28 +38,15 @@ message CreateResponse {
 }
 
 message ListRequest {
-    string parent = 1;
-    int32 page_size = 2;
-    string page_token = 3;
+    optional int32 page_size = 1;
+    optional string page_token = 2;
+    optional string user_id = 3;
+    optional string course_id = 4;
 }
 
 message ListResponse {
     repeated Cert certificates = 1;
     string next_page_token = 2;
-}
-
-message ListForUserRequest {
-    string parent = 1;
-    int32 page_size = 2;
-    string page_token = 3;
-    string user_id = 4;
-}
-
-message ListForCourseRequest {
-    string parent = 1;
-    int32 page_size = 2;
-    string page_token = 3;
-    string course_id = 4;
 }
 
 message DeleteRequest {

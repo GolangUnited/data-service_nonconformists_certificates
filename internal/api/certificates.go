@@ -21,7 +21,7 @@ type GRPCServer struct {
 func (srv *GRPCServer) Get(ctx context.Context, req *GetRequest) (*GetResponse, error) {
 	cert, err := srv.Database.GetById(req.Id)
 	if err != nil {
-		err = status.New(codes.NotFound, err.Error()).Err()
+		return nil, status.New(codes.NotFound, err.Error()).Err()
 	}
 	return &GetResponse{Certificate: WriteApiCert(cert)}, err
 }
@@ -70,9 +70,9 @@ func (srv *GRPCServer) List(ctx context.Context, req *ListRequest) (*ListRespons
 func (srv *GRPCServer) Delete(ctx context.Context, req *DeleteRequest) (*emptypb.Empty, error) {
 	err := srv.Database.Delete(req.Id)
 	if err != nil {
-		err = status.New(codes.Internal, err.Error()).Err()
+		return &emptypb.Empty{}, status.New(codes.Internal, err.Error()).Err()
 	}
-	return &emptypb.Empty{}, err
+	return &emptypb.Empty{}, nil
 }
 
 func WriteApiCert(cert models.Certificate) *Cert {

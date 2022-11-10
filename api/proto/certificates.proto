@@ -2,7 +2,7 @@ syntax = "proto3";
 import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
 
-option go_package = "./pkg/api";
+option go_package = "./internal/api";
 
 package certificates;
 

@@ -1,11 +1,11 @@
 // Package db contains DB interface
 // and it's implementations for different backends.
 
-package db
+package interfaces
 
-import "golang-united-certificates/pkg/models"
+import "golang-united-certificates/internal/models"
 
-type DB interface {
+type CertificatesRepos interface {
 	Connect(connectionString string) error
 	GetCertById(id string) (result models.Certificate, err error)
 	IsCertExistsByUserAndCourse(userId, courseId string) bool

@@ -9,7 +9,7 @@ type CertificatesRepos interface {
 	Connect(connectionString string) error
 	GetById(id string) (result models.Certificate, err error)
 	Create(cert *models.Certificate) error
-	List(listOptions models.ListOptions) (result []models.Certificate, NextPageToken string, err error)
+	List(listOptions models.ListOptions) (result []models.Certificate, err error)
 	Delete(id string) error
 	Disconnect()
 }

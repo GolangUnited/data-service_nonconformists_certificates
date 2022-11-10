@@ -1,17 +1,17 @@
 package models
 
 type ListOptions struct {
-	PageSize  int
-	PageToken string
-	UserId    string
-	CourseId  string
+	Limit    int
+	Offset   int
+	UserId   string
+	CourseId string
 }
 
 func (opts *ListOptions) SetDefaults() {
-	if opts.PageSize <= 0 {
-		opts.PageSize = 10
+	if opts.Limit <= 0 {
+		opts.Limit = 10
 	}
-	if opts.PageToken == "" {
-		opts.PageToken = "0"
+	if opts.Offset < 0 {
+		opts.Offset = 0
 	}
 }

@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"strconv"
 	"time"
 
 	"golang-united-certificates/internal/models"
@@ -40,13 +39,7 @@ func (rcv *InMemDb) Create(cert *models.Certificate) error {
 	return nil
 }
 
-func (rcv *InMemDb) List(listOptions models.ListOptions) ([]models.Certificate, string, error) {
-	var npt string
-
-	pt, err := strconv.Atoi(listOptions.PageToken)
-	if err != nil {
-		return nil, npt, err
-	}
+func (rcv *InMemDb) List(listOptions models.ListOptions) ([]models.Certificate, error) {
 	var fresult []models.Certificate
 	for _, cert := range rcv.records {
 		if filterByUserID(cert, listOptions.UserId) {
@@ -56,20 +49,19 @@ func (rcv *InMemDb) List(listOptions models.ListOptions) ([]models.Certificate, 
 		}
 	}
 	if len(fresult) == 0 {
-		return nil, npt, errors.New("no records found")
+		return nil, errors.New("no records found")
 	}
-	if pt >= len(fresult) {
-		return nil, npt, errors.New("Incorrect page token")
+	if listOptions.Offset >= len(fresult) {
+		return nil, errors.New("Incorrect page token")
 	}
 
 	var result []models.Certificate
-	if pt+listOptions.PageSize >= len(fresult) {
-		result = append(result, fresult[pt:len(fresult)]...)
+	if listOptions.Offset+listOptions.Limit >= len(fresult) {
+		result = append(result, fresult[listOptions.Offset:]...)
 	} else {
-		result = append(result, fresult[pt:pt+listOptions.PageSize]...)
-		npt = strconv.Itoa(pt + listOptions.PageSize)
+		result = append(result, fresult[listOptions.Offset:listOptions.Offset+listOptions.Limit]...)
 	}
-	return result, npt, nil
+	return result, nil
 }
 
 func filterByUserID(cert models.Certificate, uid string) bool {

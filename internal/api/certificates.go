@@ -5,7 +5,6 @@ import (
 	"errors"
 	"golang-united-certificates/internal/interfaces"
 	"golang-united-certificates/internal/models"
-	"log"
 
 	"github.com/google/uuid"
 	"google.golang.org/grpc/codes"
@@ -38,9 +37,7 @@ func (srv *GRPCServer) Create(ctx context.Context, req *CreateRequest) (*CreateR
 		CourseId: cert.CourseId,
 	}
 	listOptions.SetDefaults()
-	log.Println(listOptions)
-	c, _, _ := srv.Database.List(listOptions)
-	log.Println(c)
+	c, _ := srv.Database.List(listOptions)
 	if len(c) != 0 {
 		return &CreateResponse{}, status.New(codes.AlreadyExists, errors.New("Cert for this user for this course was already created").Error()).Err()
 	}
@@ -53,13 +50,13 @@ func (srv *GRPCServer) Create(ctx context.Context, req *CreateRequest) (*CreateR
 
 func (srv *GRPCServer) List(ctx context.Context, req *ListRequest) (*ListResponse, error) {
 	listOptions := models.ListOptions{
-		PageSize:  int(req.GetPageSize()),
-		PageToken: req.GetPageToken(),
-		UserId:    req.GetUserId(),
-		CourseId:  req.GetCourseId(),
+		Limit:    int(req.GetLimit()),
+		Offset:   int(req.GetOffset()),
+		UserId:   req.GetUserId(),
+		CourseId: req.GetCourseId(),
 	}
 	listOptions.SetDefaults()
-	data, npt, err := srv.Database.List(listOptions)
+	data, err := srv.Database.List(listOptions)
 	resp := make([]*Cert, len(data))
 	for k, cert := range data {
 		resp[k] = WriteApiCert(cert)
@@ -67,7 +64,7 @@ func (srv *GRPCServer) List(ctx context.Context, req *ListRequest) (*ListRespons
 	if err != nil {
 		err = status.New(codes.Internal, err.Error()).Err()
 	}
-	return &ListResponse{Certificates: resp, NextPageToken: npt}, err
+	return &ListResponse{Certificates: resp}, err
 }
 
 func (srv *GRPCServer) Delete(ctx context.Context, req *DeleteRequest) (*emptypb.Empty, error) {

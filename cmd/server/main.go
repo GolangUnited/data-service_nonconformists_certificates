@@ -31,8 +31,8 @@ func main() {
 	database.Connect(conf.ConnectionString)
 	defer database.Disconnect()
 	srv := grpc.NewServer()
-	grpcsrv := &api.GRPCServer{Database: database}
-	api.RegisterCertificatesServer(srv, grpcsrv)
+	grpcSrv := &api.GRPCServer{Database: database}
+	api.RegisterCertificatesServer(srv, grpcSrv)
 
 	log.Printf("starting server on port %d", conf.Port)
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", conf.Port))

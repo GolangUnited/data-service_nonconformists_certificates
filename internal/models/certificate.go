@@ -2,6 +2,8 @@ package models
 
 import "time"
 
+// Certificate is base model of object to operate
+// within golang-united-certificates
 type Certificate struct {
 	Id        string
 	UserId    string

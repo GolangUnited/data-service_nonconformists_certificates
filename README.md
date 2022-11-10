@@ -12,6 +12,12 @@ erDiagram
     }
 ```
 
+### Command to compile protocol buffer 
+
+```
+$ protoc --go_out=. --go-grpc_out=. ./api/proto/certificates.proto
+```
+
 ### Build and run
 
 ```

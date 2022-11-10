@@ -2,7 +2,7 @@ package db
 
 import (
 	"errors"
-	"golang-united-certificates/pkg/models"
+	"golang-united-certificates/internal/models"
 	"log"
 	"strconv"
 

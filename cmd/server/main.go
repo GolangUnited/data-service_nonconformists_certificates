@@ -6,9 +6,9 @@ import (
 	"net"
 
 	"golang-united-certificates/config"
-	"golang-united-certificates/pkg/api"
-	"golang-united-certificates/pkg/certificates"
-	"golang-united-certificates/pkg/db"
+	"golang-united-certificates/internal/api"
+	"golang-united-certificates/internal/interfaces"
+	db "golang-united-certificates/internal/repositories/certificates"
 
 	"google.golang.org/grpc"
 )
@@ -18,7 +18,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	var database db.DB
+	var database interfaces.CertificatesRepos
 	switch conf.DBType {
 	case "inmem":
 		database = new(db.InMemDb)
@@ -31,7 +31,7 @@ func main() {
 	database.Connect(conf.ConnectionString)
 	defer database.Disconnect()
 	srv := grpc.NewServer()
-	grpcsrv := &certificates.GRPCServer{Database: database}
+	grpcsrv := &api.GRPCServer{Database: database}
 	api.RegisterCertificatesServer(srv, grpcsrv)
 
 	log.Printf("starting server on port %d", conf.Port)

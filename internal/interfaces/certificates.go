@@ -22,8 +22,9 @@ type CertificatesRepos interface {
 	// options for it's validity. If no data found - returns empty array of certificates.
 	List(listOptions models.ListOptions) ([]models.Certificate, error)
 
-	// Delete removes certificate with given ID from database
-	Delete(id string) error
+	// Delete removes given certificate
+	// And updates DeletedBy record
+	Delete(cert *models.Certificate) error
 
 	// Disconnect closes all connections to database
 	Disconnect()

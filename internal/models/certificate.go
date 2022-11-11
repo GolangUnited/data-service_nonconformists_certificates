@@ -9,4 +9,7 @@ type Certificate struct {
 	UserId    string
 	CourseId  string
 	CreatedAt time.Time
+	CreatedBy string
+	DeletedAt time.Time
+	DeletedBy string
 }

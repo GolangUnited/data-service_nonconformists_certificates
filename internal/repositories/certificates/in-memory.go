@@ -35,6 +35,7 @@ func (rcv *InMemDb) GetById(id string) (models.Certificate, error) {
 // Always returns nil as error
 func (rcv *InMemDb) Create(cert *models.Certificate) error {
 	cert.CreatedAt = time.Now()
+	cert.CreatedBy = fmt.Sprint(uuid.New())
 	rcv.records = append(rcv.records, *cert)
 	return nil
 }
@@ -44,13 +45,16 @@ func (rcv *InMemDb) Create(cert *models.Certificate) error {
 func (rcv *InMemDb) List(listOptions models.ListOptions) ([]models.Certificate, error) {
 	var fResult []models.Certificate
 	for _, cert := range rcv.records {
-		if filterByUserID(cert, listOptions.UserId) {
-			if filterByCourseID(cert, listOptions.CourseId) {
-				fResult = append(fResult, cert)
+		if filterIfDeleted(cert, listOptions.ShowDeleted) {
+			if filterByUserID(cert, listOptions.UserId) {
+				if filterByCourseID(cert, listOptions.CourseId) {
+					fResult = append(fResult, cert)
+				}
 			}
 		}
 	}
 	if len(fResult) == 0 {
+		log.Println("no records found")
 		return nil, errors.New("no records found")
 	}
 	if listOptions.Offset >= len(fResult) {
@@ -78,17 +82,24 @@ func filterByCourseID(cert models.Certificate, cid string) bool {
 	return cert.CourseId == cid || cid == ""
 }
 
-// Delete removes certificate with given ID from database
-// by changing founded cert and last item and
-// changing size of slice to -1
-// Always returns nil as error
-func (rcv *InMemDb) Delete(id string) error {
-	for k, cert := range rcv.records {
-		if cert.Id == id {
-			rcv.records[k], rcv.records[len(rcv.records)-1] = rcv.records[len(rcv.records)-1], rcv.records[k]
+// filterIfDeleted returns true if DeletedAt is zero(not filled)
+func filterIfDeleted(cert models.Certificate, showDeleted bool) bool {
+	return cert.DeletedAt.IsZero() || showDeleted
+}
+
+// Delete marks certificate in DB as deleted
+// imitating soft delete from real DB
+// by changing DeletedAt
+// and DeletedBy properties.
+// Always returns nil as error.
+func (rcv *InMemDb) Delete(inCert *models.Certificate) error {
+	for k, crt := range rcv.records {
+		if crt.Id == inCert.Id && crt.DeletedAt.IsZero() {
+			rcv.records[k].DeletedAt = time.Now()
+			rcv.records[k].DeletedBy = inCert.DeletedBy
+			break
 		}
 	}
-	rcv.records = rcv.records[0 : len(rcv.records)-2]
 	return nil
 }
 
@@ -113,6 +124,14 @@ func (rcv *InMemDb) Disconnect() {
 func (rcv *InMemDb) init() {
 	for i := 0; i < 100; i++ {
 		time.Sleep(time.Duration(2))
-		rcv.records = append(rcv.records, models.Certificate{Id: fmt.Sprint(uuid.New()), UserId: fmt.Sprint(uuid.New()), CourseId: fmt.Sprint(uuid.New()), CreatedAt: time.Now()})
+		rcv.records = append(
+			rcv.records,
+			models.Certificate{
+				Id:        fmt.Sprint(uuid.New()),
+				UserId:    fmt.Sprint(uuid.New()),
+				CourseId:  fmt.Sprint(uuid.New()),
+				CreatedAt: time.Now(),
+				CreatedBy: fmt.Sprint(uuid.New()),
+			})
 	}
 }

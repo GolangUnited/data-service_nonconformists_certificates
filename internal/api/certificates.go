@@ -49,10 +49,11 @@ func (srv *GRPCServer) Create(ctx context.Context, req *CreateRequest) (*CreateR
 
 func (srv *GRPCServer) List(ctx context.Context, req *ListRequest) (*ListResponse, error) {
 	listOptions := models.ListOptions{
-		Limit:    int(req.GetLimit()),
-		Offset:   int(req.GetOffset()),
-		UserId:   req.GetUserId(),
-		CourseId: req.GetCourseId(),
+		Limit:       int(req.GetLimit()),
+		Offset:      int(req.GetOffset()),
+		UserId:      req.GetUserId(),
+		CourseId:    req.GetCourseId(),
+		ShowDeleted: req.GetShowDeleted(),
 	}
 	listOptions.SetDefaults()
 	data, err := srv.Database.List(listOptions)
@@ -67,7 +68,11 @@ func (srv *GRPCServer) List(ctx context.Context, req *ListRequest) (*ListRespons
 }
 
 func (srv *GRPCServer) Delete(ctx context.Context, req *DeleteRequest) (*emptypb.Empty, error) {
-	err := srv.Database.Delete(req.Id)
+	cert := models.Certificate{
+		Id:        req.GetId(),
+		DeletedBy: req.GetDeletedBy(),
+	}
+	err := srv.Database.Delete(&cert)
 	if err != nil {
 		return &emptypb.Empty{}, errGeneral
 	}
@@ -80,5 +85,8 @@ func WriteApiCert(cert models.Certificate) *Cert {
 		UserId:    cert.UserId,
 		CourseId:  cert.CourseId,
 		CreatedAt: timestamppb.New(cert.CreatedAt),
+		CreatedBy: cert.CreatedBy,
+		DeletedAt: timestamppb.New(cert.DeletedAt),
+		DeletedBy: cert.DeletedBy,
 	}
 }

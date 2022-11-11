@@ -3,10 +3,20 @@ package models
 // ListOptions should be used as set of filters
 // for any Database List method implementation
 type ListOptions struct {
-	Limit    int
-	Offset   int
-	UserId   string
+	// Limits output to specified amount of entries
+	Limit int
+
+	// Offset in DB
+	Offset int
+
+	// Filter by UserId
+	UserId string
+
+	// Filter by CourseId
 	CourseId string
+
+	// Filter out deleted records
+	ShowDeleted bool
 }
 
 // SetDefaults checks and sets defaults

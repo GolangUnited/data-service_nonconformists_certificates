@@ -4,6 +4,7 @@ import (
 	"errors"
 	"golang-united-certificates/internal/models"
 	"log"
+	"time"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -81,6 +82,9 @@ func (rcv *PgSql) List(listOptions models.ListOptions) ([]models.Certificate, er
 	var certs []models.Certificate
 	mod := rcv.db.Model(&model)
 
+	if !listOptions.ShowDeleted {
+		mod = mod.Where("deleted_at IS NULL")
+	}
 	if listOptions.UserId != "" {
 		mod = mod.Where("user_id = ?", listOptions.UserId)
 	}
@@ -97,8 +101,10 @@ func (rcv *PgSql) List(listOptions models.ListOptions) ([]models.Certificate, er
 
 // Delete removes certificate with given ID from database
 // Always returns nil error
-func (rcv *PgSql) Delete(id string) error {
-	rcv.db.Model(&model).Where("id = ?", id).Delete(models.Certificate{})
+func (rcv *PgSql) Delete(cert *models.Certificate) error {
+	toDel := rcv.db.Model(&model).Where("id = ? AND deleted_at IS NULL", cert.Id)
+	cert.DeletedAt = time.Now()
+	toDel.Updates(cert)
 	return nil
 }
 

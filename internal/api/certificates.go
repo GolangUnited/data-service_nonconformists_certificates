@@ -31,9 +31,10 @@ func (srv *GRPCServer) Get(ctx context.Context, req *GetRequest) (*GetResponse, 
 
 func (srv *GRPCServer) Create(ctx context.Context, req *CreateRequest) (*CreateResponse, error) {
 	cert := models.Certificate{
-		Id:       uuid.New().String(),
-		UserId:   req.GetUserId(),
-		CourseId: req.GetCourseId(),
+		Id:        uuid.New().String(),
+		UserId:    req.GetUserId(),
+		CourseId:  req.GetCourseId(),
+		CreatedBy: req.GetCreatedBy(),
 	}
 	err := srv.Database.Create(&cert)
 	if err != nil {

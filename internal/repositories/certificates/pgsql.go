@@ -18,6 +18,7 @@ type PgSql struct {
 }
 
 var model models.Certificate
+var isNotDeletedQuery = "deleted_at IS NULL OR deleted_at = '0001-01-01 00:00:00+00'"
 
 // Connect connects to PSQL with given connection string
 // with auto migrations.
@@ -83,7 +84,7 @@ func (rcv *PgSql) List(listOptions models.ListOptions) ([]models.Certificate, er
 	mod := rcv.db.Model(&model)
 
 	if !listOptions.ShowDeleted {
-		mod = mod.Where("deleted_at IS NULL")
+		mod = mod.Where(isNotDeletedQuery)
 	}
 	if listOptions.UserId != "" {
 		mod = mod.Where("user_id = ?", listOptions.UserId)
@@ -102,7 +103,7 @@ func (rcv *PgSql) List(listOptions models.ListOptions) ([]models.Certificate, er
 // Delete removes certificate with given ID from database
 // Always returns nil error
 func (rcv *PgSql) Delete(cert *models.Certificate) error {
-	toDel := rcv.db.Model(&model).Where("id = ? AND deleted_at IS NULL", cert.Id)
+	toDel := rcv.db.Model(&model).Where("id = ?", cert.Id).Where(isNotDeletedQuery)
 	cert.DeletedAt = time.Now()
 	toDel.Updates(cert)
 	return nil

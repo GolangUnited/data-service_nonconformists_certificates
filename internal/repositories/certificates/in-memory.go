@@ -35,7 +35,6 @@ func (rcv *InMemDb) GetById(id string) (models.Certificate, error) {
 // Always returns nil as error
 func (rcv *InMemDb) Create(cert *models.Certificate) error {
 	cert.CreatedAt = time.Now()
-	cert.CreatedBy = fmt.Sprint(uuid.New())
 	rcv.records = append(rcv.records, *cert)
 	return nil
 }

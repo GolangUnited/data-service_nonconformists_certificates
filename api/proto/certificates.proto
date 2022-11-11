@@ -34,6 +34,7 @@ message GetResponse {
 message CreateRequest {
     string user_id = 1;
     string course_id = 2;
+    string created_by = 3;
 }
 
 message CreateResponse {

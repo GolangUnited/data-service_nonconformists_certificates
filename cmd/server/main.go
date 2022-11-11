@@ -32,7 +32,6 @@ func main() {
 	defer database.Disconnect()
 	srv := grpc.NewServer()
 	grpcSrv := api.NewCertApi(database)
-	// grpcSrv := &api.GRPCServer{Database: database}
 	api.RegisterCertificatesServer(srv, grpcSrv)
 
 	log.Printf("starting server on port %d", conf.Port)

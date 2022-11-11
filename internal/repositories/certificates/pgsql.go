@@ -60,8 +60,18 @@ func (rcv *PgSql) GetById(id string) (models.Certificate, error) {
 }
 
 // Create adds given certificate to database and
-// fills up it's properties.
+// fills up it's properties. Returns "AlreadyExists" error if
+// record for such user and course already in place.
 func (rcv *PgSql) Create(cert *models.Certificate) error {
+	listOptions := models.ListOptions{
+		UserId:   cert.UserId,
+		CourseId: cert.CourseId,
+	}
+	listOptions.SetDefaults()
+	c, _ := rcv.List(listOptions)
+	if len(c) != 0 {
+		return errors.New("AlreadyExists")
+	}
 	return rcv.db.Create(&cert).Error
 }
 
@@ -79,18 +89,17 @@ func (rcv *PgSql) List(listOptions models.ListOptions) ([]models.Certificate, er
 	}
 	err := mod.Offset(listOptions.Offset).Limit(listOptions.Limit).Find(&certs).Error
 	if err != nil {
+		log.Printf("an error occured while getting records from db: %s", err.Error())
 		return certs, err
 	}
 	return certs, nil
 }
 
 // Delete removes certificate with given ID from database
+// Always returns nil error
 func (rcv *PgSql) Delete(id string) error {
-	err := rcv.db.Model(&model).Where("id = ?", id).Delete(models.Certificate{}).Error
-	if err != nil {
-		log.Println("can't delete")
-	}
-	return err
+	rcv.db.Model(&model).Where("id = ?", id).Delete(models.Certificate{})
+	return nil
 }
 
 // applyMigrations uses gorm AutoMigrate to create DB schema

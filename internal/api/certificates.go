@@ -2,13 +2,10 @@ package api
 
 import (
 	"context"
-	"errors"
 	"golang-united-certificates/internal/interfaces"
 	"golang-united-certificates/internal/models"
 
 	"github.com/google/uuid"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -18,12 +15,18 @@ type GRPCServer struct {
 	Database interfaces.CertificatesRepos
 }
 
+func NewCertApi(db interfaces.CertificatesRepos) *GRPCServer {
+	return &GRPCServer{
+		Database: db,
+	}
+}
+
 func (srv *GRPCServer) Get(ctx context.Context, req *GetRequest) (*GetResponse, error) {
 	cert, err := srv.Database.GetById(req.Id)
 	if err != nil {
-		return nil, status.New(codes.NotFound, err.Error()).Err()
+		return nil, errCertNotFound
 	}
-	return &GetResponse{Certificate: WriteApiCert(cert)}, err
+	return &GetResponse{Certificate: WriteApiCert(cert)}, nil
 }
 
 func (srv *GRPCServer) Create(ctx context.Context, req *CreateRequest) (*CreateResponse, error) {
@@ -32,18 +35,14 @@ func (srv *GRPCServer) Create(ctx context.Context, req *CreateRequest) (*CreateR
 		UserId:   req.GetUserId(),
 		CourseId: req.GetCourseId(),
 	}
-	listOptions := models.ListOptions{
-		UserId:   cert.UserId,
-		CourseId: cert.CourseId,
-	}
-	listOptions.SetDefaults()
-	c, _ := srv.Database.List(listOptions)
-	if len(c) != 0 {
-		return &CreateResponse{}, status.New(codes.AlreadyExists, errors.New("Cert for this user for this course was already created").Error()).Err()
-	}
 	err := srv.Database.Create(&cert)
 	if err != nil {
-		return nil, status.New(codes.Internal, err.Error()).Err()
+		switch err.Error() {
+		case "AlreadyExists":
+			return nil, errCertAlreadyExists
+		default:
+			return nil, errGeneral
+		}
 	}
 	return &CreateResponse{Certificate: WriteApiCert(cert)}, nil
 }
@@ -57,24 +56,29 @@ func (srv *GRPCServer) List(ctx context.Context, req *ListRequest) (*ListRespons
 	}
 	listOptions.SetDefaults()
 	data, err := srv.Database.List(listOptions)
+	if err != nil {
+		return nil, errGeneral
+	}
 	resp := make([]*Cert, len(data))
 	for k, cert := range data {
 		resp[k] = WriteApiCert(cert)
 	}
-	if err != nil {
-		err = status.New(codes.Internal, err.Error()).Err()
-	}
-	return &ListResponse{Certificates: resp}, err
+	return &ListResponse{Certificates: resp}, nil
 }
 
 func (srv *GRPCServer) Delete(ctx context.Context, req *DeleteRequest) (*emptypb.Empty, error) {
 	err := srv.Database.Delete(req.Id)
 	if err != nil {
-		return &emptypb.Empty{}, status.New(codes.Internal, err.Error()).Err()
+		return &emptypb.Empty{}, errGeneral
 	}
 	return &emptypb.Empty{}, nil
 }
 
 func WriteApiCert(cert models.Certificate) *Cert {
-	return &Cert{Id: cert.Id, UserId: cert.UserId, CourseId: cert.CourseId, CreatedAt: timestamppb.New(cert.CreatedAt)}
+	return &Cert{
+		Id:        cert.Id,
+		UserId:    cert.UserId,
+		CourseId:  cert.CourseId,
+		CreatedAt: timestamppb.New(cert.CreatedAt),
+	}
 }

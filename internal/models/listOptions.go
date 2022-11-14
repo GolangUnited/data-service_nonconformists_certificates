@@ -22,8 +22,13 @@ type ListOptions struct {
 // SetDefaults checks and sets defaults
 // for Limit and Offset
 func (opts *ListOptions) SetDefaults() {
-	if opts.Limit <= 0 {
+	switch {
+	// Default page size is 10
+	case opts.Limit <= 0:
 		opts.Limit = 10
+	// Max page size is 100
+	case opts.Limit > 100:
+		opts.Limit = 100
 	}
 	if opts.Offset < 0 {
 		opts.Offset = 0

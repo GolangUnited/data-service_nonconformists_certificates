@@ -21,13 +21,13 @@ func GetConfig() (Config, error) {
 	viper.SetConfigFile(".env")
 	viper.SetEnvPrefix("certmgr")
 	viper.AutomaticEnv()
-	err := viper.ReadInConfig()
-	var conf Config
-	if err != nil {
-		return conf, err
+	if err := viper.ReadInConfig(); err != nil {
+		return Config{}, err
 	}
-	conf.Port = viper.GetInt("port")
-	conf.DBType = viper.GetString("dbtype")
-	conf.ConnectionString = viper.GetString("ConnectionString")
+	conf := Config{
+		Port:             viper.GetInt("port"),
+		DBType:           viper.GetString("dbtype"),
+		ConnectionString: viper.GetString("ConnectionString"),
+	}
 	return conf, nil
 }

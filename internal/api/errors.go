@@ -9,6 +9,9 @@ var (
 	// errGeneral is an error when we don't want to share details
 	errGeneral = status.New(codes.Internal, "Something went wrong").Err()
 
+	// errIncorrectInput is an error when we can't parse input(usually string to UUID)
+	errIncorrectInput = status.New(codes.Internal, "Incorrect input").Err()
+
 	// errCertNotFound is an error when no certificate was found in database
 	errCertNotFound = status.New(codes.NotFound, "Certificate not found").Err()
 

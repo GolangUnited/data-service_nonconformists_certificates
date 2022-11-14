@@ -4,7 +4,6 @@ import (
 	"errors"
 	"golang-united-certificates/internal/models"
 	"log"
-	"time"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -18,7 +17,7 @@ type PgSql struct {
 }
 
 var model models.Certificate
-var isNotDeletedQuery = "deleted_at IS NULL OR deleted_at = '0001-01-01 00:00:00+00'"
+var isNotDeletedQuery = "is_deleted = false"
 
 // Connect connects to PSQL with given connection string
 // with auto migrations.
@@ -103,9 +102,8 @@ func (rcv *PgSql) List(listOptions models.ListOptions) ([]models.Certificate, er
 // Delete removes certificate with given ID from database
 // Always returns nil error
 func (rcv *PgSql) Delete(cert *models.Certificate) error {
-	toDel := rcv.db.Model(&model).Where("id = ?", cert.Id).Where(isNotDeletedQuery)
-	cert.DeletedAt = time.Now()
-	toDel.Updates(cert)
+	toDel := rcv.db.Model(&model).Where("id = ?", cert.ID).Where(isNotDeletedQuery)
+	toDel.UpdateColumn("is_deleted", true)
 	return nil
 }
 

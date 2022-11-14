@@ -23,7 +23,7 @@ type InMemDb struct {
 // empty struct and NotFound error
 func (rcv *InMemDb) GetById(id string) (models.Certificate, error) {
 	for _, cert := range rcv.records {
-		if cert.Id == id {
+		if cert.ID == id {
 			return cert, nil
 		}
 	}
@@ -34,6 +34,7 @@ func (rcv *InMemDb) GetById(id string) (models.Certificate, error) {
 // fills up it's properties.
 // Always returns nil as error
 func (rcv *InMemDb) Create(cert *models.Certificate) error {
+	cert.ID = uuid.New().String()
 	cert.CreatedAt = time.Now()
 	rcv.records = append(rcv.records, *cert)
 	return nil
@@ -81,9 +82,9 @@ func filterByCourseID(cert models.Certificate, cid string) bool {
 	return cert.CourseId == cid || cid == ""
 }
 
-// filterIfDeleted returns true if DeletedAt is zero(not filled)
+// filterIfDeleted returns true if isDeleted is true
 func filterIfDeleted(cert models.Certificate, showDeleted bool) bool {
-	return cert.DeletedAt.IsZero() || showDeleted
+	return cert.IsDeleted || showDeleted
 }
 
 // Delete marks certificate in DB as deleted
@@ -93,9 +94,8 @@ func filterIfDeleted(cert models.Certificate, showDeleted bool) bool {
 // Always returns nil as error.
 func (rcv *InMemDb) Delete(inCert *models.Certificate) error {
 	for k, crt := range rcv.records {
-		if crt.Id == inCert.Id && crt.DeletedAt.IsZero() {
-			rcv.records[k].DeletedAt = time.Now()
-			rcv.records[k].DeletedBy = inCert.DeletedBy
+		if crt.ID == inCert.ID {
+			rcv.records[k].IsDeleted = true
 			break
 		}
 	}
@@ -126,11 +126,11 @@ func (rcv *InMemDb) init() {
 		rcv.records = append(
 			rcv.records,
 			models.Certificate{
-				Id:        fmt.Sprint(uuid.New()),
+				ID:        fmt.Sprint(uuid.New()),
 				UserId:    fmt.Sprint(uuid.New()),
 				CourseId:  fmt.Sprint(uuid.New()),
 				CreatedAt: time.Now(),
-				CreatedBy: fmt.Sprint(uuid.New()),
-			})
+			},
+		)
 	}
 }

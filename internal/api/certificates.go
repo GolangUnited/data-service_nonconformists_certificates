@@ -4,6 +4,7 @@ import (
 	"context"
 	"golang-united-certificates/internal/interfaces"
 	"golang-united-certificates/internal/models"
+	"log"
 
 	"github.com/google/uuid"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -22,19 +23,23 @@ func NewCertApi(db interfaces.CertificatesRepos) *GRPCServer {
 }
 
 func (srv *GRPCServer) Get(ctx context.Context, req *GetRequest) (*GetResponse, error) {
-	cert, err := srv.Database.GetById(req.Id)
+	if !isUUID(req.GetId()) {
+		return nil, errIncorrectInput
+	}
+	cert, err := srv.Database.GetById(req.GetId())
 	if err != nil {
 		return nil, errCertNotFound
 	}
-	return &GetResponse{Certificate: WriteApiCert(cert)}, nil
+	return &GetResponse{Certificate: writeApiCert(cert)}, nil
 }
 
 func (srv *GRPCServer) Create(ctx context.Context, req *CreateRequest) (*CreateResponse, error) {
+	if !isUUID(req.GetUserId()) || !isUUID(req.GetCourseId()) {
+		return nil, errIncorrectInput
+	}
 	cert := models.Certificate{
-		Id:        uuid.New().String(),
-		UserId:    req.GetUserId(),
-		CourseId:  req.GetCourseId(),
-		CreatedBy: req.GetCreatedBy(),
+		UserId:   req.GetUserId(),
+		CourseId: req.GetCourseId(),
 	}
 	err := srv.Database.Create(&cert)
 	if err != nil {
@@ -45,10 +50,16 @@ func (srv *GRPCServer) Create(ctx context.Context, req *CreateRequest) (*CreateR
 			return nil, errGeneral
 		}
 	}
-	return &CreateResponse{Certificate: WriteApiCert(cert)}, nil
+	return &CreateResponse{Certificate: writeApiCert(cert)}, nil
 }
 
 func (srv *GRPCServer) List(ctx context.Context, req *ListRequest) (*ListResponse, error) {
+	if cid := req.GetCourseId(); !isUUID(cid) && len(cid) != 0 {
+		return nil, errIncorrectInput
+	}
+	if cid := req.GetUserId(); !isUUID(cid) && len(cid) != 0 {
+		return nil, errIncorrectInput
+	}
 	listOptions := models.ListOptions{
 		Limit:       int(req.GetLimit()),
 		Offset:      int(req.GetOffset()),
@@ -63,15 +74,17 @@ func (srv *GRPCServer) List(ctx context.Context, req *ListRequest) (*ListRespons
 	}
 	resp := make([]*Cert, len(data))
 	for k, cert := range data {
-		resp[k] = WriteApiCert(cert)
+		resp[k] = writeApiCert(cert)
 	}
 	return &ListResponse{Certificates: resp}, nil
 }
 
 func (srv *GRPCServer) Delete(ctx context.Context, req *DeleteRequest) (*emptypb.Empty, error) {
+	if !isUUID(req.GetId()) {
+		return nil, errIncorrectInput
+	}
 	cert := models.Certificate{
-		Id:        req.GetId(),
-		DeletedBy: req.GetDeletedBy(),
+		ID: req.GetId(),
 	}
 	err := srv.Database.Delete(&cert)
 	if err != nil {
@@ -80,14 +93,21 @@ func (srv *GRPCServer) Delete(ctx context.Context, req *DeleteRequest) (*emptypb
 	return &emptypb.Empty{}, nil
 }
 
-func WriteApiCert(cert models.Certificate) *Cert {
+func writeApiCert(cert models.Certificate) *Cert {
 	return &Cert{
-		Id:        cert.Id,
+		Id:        cert.ID,
 		UserId:    cert.UserId,
 		CourseId:  cert.CourseId,
 		CreatedAt: timestamppb.New(cert.CreatedAt),
-		CreatedBy: cert.CreatedBy,
-		DeletedAt: timestamppb.New(cert.DeletedAt),
-		DeletedBy: cert.DeletedBy,
+		IsDeleted: cert.IsDeleted,
 	}
+}
+
+// returns nil if UUID and
+func isUUID(s string) bool {
+	if _, err := uuid.Parse(s); err != nil {
+		log.Printf("gon an incorrect input. want UUID, got %s", s)
+		return false
+	}
+	return true
 }

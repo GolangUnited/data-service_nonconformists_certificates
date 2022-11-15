@@ -58,6 +58,7 @@ func (rcv *InMemDb) List(listOptions models.ListOptions) ([]models.Certificate, 
 		return nil, errors.New("no records found")
 	}
 	if listOptions.Offset >= len(fResult) {
+		log.Println("no records found")
 		return nil, errors.New("Incorrect page token")
 	}
 
@@ -84,7 +85,7 @@ func filterByCourseID(cert models.Certificate, cid string) bool {
 
 // filterIfDeleted returns true if isDeleted is true
 func filterIfDeleted(cert models.Certificate, showDeleted bool) bool {
-	return cert.IsDeleted || showDeleted
+	return !cert.IsDeleted || showDeleted
 }
 
 // Delete marks certificate in DB as deleted
@@ -106,7 +107,7 @@ func (rcv *InMemDb) Delete(inCert *models.Certificate) error {
 // Always returns nil as error
 func (rcv *InMemDb) Connect(connectionString string) error {
 	log.Println("initializing local In-Memory Database...")
-	rcv.init()
+	rcv.init(100)
 	log.Println("done!")
 	return nil
 }
@@ -120,8 +121,8 @@ func (rcv *InMemDb) Disconnect() {
 }
 
 // init generates data for in-memory storage
-func (rcv *InMemDb) init() {
-	for i := 0; i < 100; i++ {
+func (rcv *InMemDb) init(n int) {
+	for i := 0; i <= n; i++ {
 		time.Sleep(time.Duration(2))
 		rcv.records = append(
 			rcv.records,

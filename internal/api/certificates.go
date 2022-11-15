@@ -4,7 +4,6 @@ import (
 	"context"
 	"golang-united-certificates/internal/interfaces"
 	"golang-united-certificates/internal/models"
-	"log"
 
 	"github.com/google/uuid"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -57,7 +56,7 @@ func (srv *GRPCServer) List(ctx context.Context, req *ListRequest) (*ListRespons
 	if cid := req.GetCourseId(); !isUUID(cid) && len(cid) != 0 {
 		return nil, errIncorrectInput
 	}
-	if cid := req.GetUserId(); !isUUID(cid) && len(cid) != 0 {
+	if uid := req.GetUserId(); !isUUID(uid) && len(uid) != 0 {
 		return nil, errIncorrectInput
 	}
 	listOptions := models.ListOptions{
@@ -106,7 +105,6 @@ func writeApiCert(cert models.Certificate) *Cert {
 // returns nil if UUID and
 func isUUID(s string) bool {
 	if _, err := uuid.Parse(s); err != nil {
-		log.Printf("gon an incorrect input. want UUID, got %s", s)
 		return false
 	}
 	return true

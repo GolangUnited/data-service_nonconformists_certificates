@@ -1,0 +1,56 @@
+syntax = "proto3";
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "./internal/api";
+
+package certificates;
+
+service Certificates {
+    rpc Get (GetRequest) returns (GetResponse);
+    rpc Create (CreateRequest) returns (CreateResponse);
+    rpc List (ListRequest) returns (ListResponse);
+    rpc Delete (DeleteRequest) returns (google.protobuf.Empty);
+}
+
+message Cert {
+    string id = 1;
+    string user_id = 2;
+    string course_id = 3;
+    google.protobuf.Timestamp created_at = 4;
+    bool is_deleted = 5;
+}
+
+message GetRequest {
+    string id = 1;
+}
+
+message GetResponse {
+    Cert certificate = 1;
+}
+
+message CreateRequest {
+    string user_id = 1;
+    string course_id = 2;
+    string created_by = 3;
+}
+
+message CreateResponse {
+    Cert certificate = 1;
+}
+
+message ListRequest {
+    optional int32 limit = 1;
+    optional int32 offset = 2;
+    optional string user_id = 3;
+    optional string course_id = 4;
+    optional bool show_deleted = 5;
+}
+
+message ListResponse {
+    repeated Cert certificates = 1;
+}
+
+message DeleteRequest {
+    string id = 1;
+}
